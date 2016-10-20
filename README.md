@@ -1,1 +1,12 @@
-# int-obl-proj
+# a-star-lib
+
+Library for running parallel A* algorithm in user-defined problem space implemented in Scala using Akka Framework.
+
+## Computational Intelligence Project
+
+Authors: Tomasz Legutko, Szymon Łabuz
+
+## Getting started
+
+1. Required Java Runtime 1.6 or later.
+2. Execute `./bin/activator run` (or `activator.bat` on Windows)
