@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 private case class DistancedNode[T](data: T, cost: Double, heuristic: Double)
 
-trait AStarAPI[T] {
+trait AStar[T] {
 
   def start: T
 
@@ -21,10 +21,10 @@ trait AStarAPI[T] {
 
 object AStarAlgorithm {
 
-  def solve[T](aStarAPI: AStarAPI[T]): List[T] = {
-    val ordering = Ordering.comparatorToOrdering(Comparator.comparing[DistancedNode[T], Double](node => node.cost + node.heuristic))
-    val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
-    val notVisited = mutable.TreeSet(DistancedNode(aStarAPI.start, 0, aStarAPI.heuristic(aStarAPI.start, aStarAPI.end)))(ordering)
+  def solve[T](aStarAPI: AStar[T]): List[T] = {
+//    val ordering = Ordering.comparatorToOrdering(Comparator.comparing[DistancedNode[T], Double](node => node.cost + node.heuristic))
+//    val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
+//    val notVisited = mutable.TreeSet(DistancedNode(aStarAPI.start, 0, aStarAPI.heuristic(aStarAPI.start, aStarAPI.end)))(ordering)
 
 
 
