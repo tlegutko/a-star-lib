@@ -1,12 +1,16 @@
 package astarlib
 
-case class AStarNode[T](name: String, data: T)
+import java.util.Comparator
+
+import scala.collection.mutable
+
+private case class DistancedNode[T](data: T, cost: Double, heuristic: Double)
 
 trait AStarAPI[T] {
 
-  def start: AStarNode[T]
+  def start: T
 
-  def end: AStarNode[T]
+  def end: T
 
   def neighbours(node: T): List[T]
 
@@ -17,13 +21,22 @@ trait AStarAPI[T] {
 
 object AStarAlgorithm {
 
-  def solve[T](aStarAPI: AStarAPI[T]): List[AStarNode[T]] = {
+  def solve[T](aStarAPI: AStarAPI[T]): List[T] = {
+    val ordering = Ordering.comparatorToOrdering(Comparator.comparing[DistancedNode[T], Double](node => node.cost + node.heuristic))
+    val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
+    val notVisited = mutable.TreeSet(DistancedNode(aStarAPI.start, 0, aStarAPI.heuristic(aStarAPI.start, aStarAPI.end)))(ordering)
+
+
+
+//    while(notVisited.nonEmpty && notVisited.toStream.) {
+    //
+    //    }
 
 
 
 
 
 
-    ???
+    List(aStarAPI.start, aStarAPI.end)
   }
 }
