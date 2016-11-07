@@ -1,6 +1,6 @@
 package astarclient
 
-import astarlib.{AStar, AStarAlgorithm}
+import astarlib.{AStarParameters, AStarAlgorithm}
 
 case class Point(x: Int, y: Int)
 
@@ -8,7 +8,7 @@ case class AStar2Dimensions(map: Seq[Seq[Int]]) {
 
   def n = map.length
 
-  def solve() = AStarAlgorithm.solve(new AStar[Point] {
+  def solve() = AStarAlgorithm.solve(new AStarParameters[Point] {
     override def start = Point(0,0)
 
     override def end = Point(n-1, n-1)
