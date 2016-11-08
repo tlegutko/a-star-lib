@@ -29,7 +29,7 @@ object AStarAlgorithm {
 
     val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
     val notVisited = mutable.TreeSet(DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start, parameters.end), List(parameters.start)))(ordering)
-    val bestSolution = Option.empty[DistancedNode[T]]
+    var bestSolution = Option.empty[DistancedNode[T]]
 
     breakable {
       while (true) {
@@ -40,7 +40,14 @@ object AStarAlgorithm {
         val node = maybeNode.get
 
         notVisited.remove(node)
-        calculateNeighbours(node, parameters).foreach(aNode => visited.add(aNode))
+        calculateNeighbours(node, parameters).foreach(aNode => {
+          if (aNode.path.last equals parameters.end) {
+            if (bestSolution.isEmpty || bestSolution.get.cost > aNode.cost) {
+              bestSolution = Option(aNode)
+            }
+          }
+          visited.add(aNode)
+        })
       }
     }
 
