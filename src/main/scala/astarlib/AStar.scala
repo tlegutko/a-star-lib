@@ -25,7 +25,7 @@ trait AStarParameters[T] {
 object AStarAlgorithm {
 
   def solve[T](parameters: AStarParameters[T]): List[T] = {
-    val ordering = Ordering.comparatorToOrdering(Comparator.comparing[DistancedNode[T], Double](node => node.totalCost))
+    val ordering = Ordering.comparatorToOrdering(Comparator.comparingDouble[DistancedNode[T]](node => node.totalCost))
 
     val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
     val notVisited = mutable.TreeSet(DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start, parameters.end), List(parameters.start)))(ordering)
