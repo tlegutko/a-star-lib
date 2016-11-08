@@ -1,6 +1,6 @@
 package astarclient
 
-import astarlib.{AStarParameters, AStarAlgorithm}
+import astarlib.{AStarAlgorithm, AStarParameters}
 
 case class Point(x: Int, y: Int)
 
@@ -9,9 +9,9 @@ case class AStar2Dimensions(map: Seq[Seq[Int]]) {
   def n = map.length
 
   def solve() = AStarAlgorithm.solve(new AStarParameters[Point] {
-    override def start = Point(0,0)
+    override def start = Point(0, 0)
 
-    override def end = Point(n-1, n-1)
+    override def isEnd(node: Point) = node.x == n - 1 && node.y == n - 1
 
     override def neighbours(node: Point): List[Point] = {
       List(
@@ -28,8 +28,8 @@ case class AStar2Dimensions(map: Seq[Seq[Int]]) {
       )
     }
 
-    override def heuristic(node1: Point, node2: Point): Double =
-      Math.sqrt(Math.pow(node1.x - node1.x, 2) + Math.pow(node1.y - node1.y, 2))
+    override def heuristic(node: Point): Double =
+      Math.sqrt(Math.pow(node.x - n + 1, 2) + Math.pow(node.y - n + 1, 2))
 
     override def cost(node1: Point, node2: Point): Double = 1
   })

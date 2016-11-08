@@ -13,11 +13,11 @@ trait AStarParameters[T] {
 
   def start: T
 
-  def end: T
+  def isEnd(node: T): Boolean
 
   def neighbours(node: T): List[T]
 
-  def heuristic(node1: T, node2: T): Double
+  def heuristic(node: T): Double
 
   def cost(node1: T, node2: T): Double
 }
@@ -28,7 +28,7 @@ object AStarAlgorithm {
     val ordering = Ordering.comparatorToOrdering(Comparator.comparingDouble[DistancedNode[T]](node => node.totalCost))
 
     val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
-    val notVisited = mutable.TreeSet(DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start, parameters.end), List(parameters.start)))(ordering)
+    val notVisited = mutable.TreeSet(DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start), List(parameters.start)))(ordering)
     var bestSolution = Option.empty[DistancedNode[T]]
 
     breakable {
@@ -41,7 +41,7 @@ object AStarAlgorithm {
 
         notVisited.remove(node)
         calculateNeighbours(node, parameters).foreach(aNode => {
-          if (aNode.path.last equals parameters.end) {
+          if (parameters.isEnd(aNode.data)) {
             if (bestSolution.isEmpty || bestSolution.get.cost > aNode.cost) {
               bestSolution = Option(aNode)
             }
@@ -64,7 +64,7 @@ object AStarAlgorithm {
     rawNeighbours.map(rawNeighbour => {
 
       val cost = originalNode.cost + parameters.cost(originalNode.data, rawNeighbour)
-      val heuristic = parameters.heuristic(rawNeighbour, originalNode.data)
+      val heuristic = parameters.heuristic(rawNeighbour)
 
       DistancedNode(rawNeighbour, cost, heuristic, originalNode.path :+ rawNeighbour)
     })
