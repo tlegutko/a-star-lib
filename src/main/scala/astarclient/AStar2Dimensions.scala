@@ -24,7 +24,7 @@ case class AStar2Dimensions(map: Seq[Seq[Int]]) {
         Point(node.x - 1, node.y),
         Point(node.x - 1, node.y - 1)
       ).filterNot(p =>
-        p.x < 0 || p.x > n || p.y < 0 || p.y > n || map(p.x)(p.y) == 0
+        p.x < 0 || p.x >= n || p.y < 0 || p.y >= n || map(p.x)(p.y) == 0
       )
     }
 

@@ -1,12 +1,13 @@
 package astarlib
 
-import java.util.Comparator
-
 import scala.collection.mutable
-import scala.util.control.Breaks._
 
 private case class DistancedNode[T](data: T, cost: Double, heuristic: Double, path: List[T]) {
   def totalCost: Double = cost + heuristic
+
+  override def hashCode(): Int = data.hashCode()
+
+  override def equals(obj: scala.Any): Boolean = data equals obj.asInstanceOf[DistancedNode[T]].data
 }
 
 trait AStarParameters[T] {
@@ -25,37 +26,42 @@ trait AStarParameters[T] {
 object AStarAlgorithm {
 
   def solve[T](parameters: AStarParameters[T]): List[T] = {
-    val ordering = Ordering.comparatorToOrdering(Comparator.comparingDouble[DistancedNode[T]](node => node.totalCost))
+    val startingNode = DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start), List(parameters.start))
 
-    val visited = mutable.TreeSet.empty[DistancedNode[T]](ordering)
-    val notVisited = mutable.TreeSet(DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start), List(parameters.start)))(ordering)
+    val visited = mutable.ListBuffer.empty[DistancedNode[T]]
+    val notVisited = mutable.ListBuffer(startingNode)
     var bestSolution = Option.empty[DistancedNode[T]]
 
-    breakable {
-      while (true) {
-        val maybeNode = nodeToContinueWith(visited, notVisited, bestSolution)
-        if (maybeNode.isEmpty) {
-          break
+    while (true) {
+      val maybeNode = nodeToContinueWith(visited, notVisited, bestSolution)
+
+      if (maybeNode.isEmpty) {
+        if (bestSolution.isDefined) {
+          return bestSolution.get.path
+        } else {
+          return List.empty
         }
-        val node = maybeNode.get
-
-        notVisited.remove(node)
-        calculateNeighbours(node, parameters).foreach(aNode => {
-          if (parameters.isEnd(aNode.data)) {
-            if (bestSolution.isEmpty || bestSolution.get.cost > aNode.cost) {
-              bestSolution = Option(aNode)
-            }
-          }
-          visited.add(aNode)
-        })
       }
+
+      val node = maybeNode.get
+
+      calculateNeighbours(node, parameters).foreach(aNode => {
+        if (parameters.isEnd(aNode.data)) {
+          if (bestSolution.isEmpty || bestSolution.get.cost > aNode.cost) {
+            bestSolution = Option(aNode)
+          }
+          if (!visited.contains(aNode)) {
+            visited += aNode
+            visited.sortBy(_.totalCost)
+          }
+        } else if (!(visited.contains(aNode) || notVisited.contains(aNode))) {
+          notVisited += aNode
+          notVisited.sortBy(_.totalCost)
+        }
+      })
     }
 
-    if (bestSolution.isDefined) {
-      bestSolution.get.path
-    } else {
-      List.empty
-    }
+    List.empty
   }
 
   private def calculateNeighbours[T](originalNode: DistancedNode[T], parameters: AStarParameters[T]): List[DistancedNode[T]] = {
@@ -70,19 +76,22 @@ object AStarAlgorithm {
     })
   }
 
-  private def nodeToContinueWith[T](visited: mutable.TreeSet[DistancedNode[T]], notVisited: mutable.TreeSet[DistancedNode[T]], bestSolution: Option[DistancedNode[T]]): Option[DistancedNode[T]] = {
-    breakable {
-      while (true) {
-        if (notVisited.isEmpty) {
-          break
-        }
+  private def nodeToContinueWith[T](visited: mutable.ListBuffer[DistancedNode[T]],
+                                    notVisited: mutable.ListBuffer[DistancedNode[T]],
+                                    bestSolution: Option[DistancedNode[T]]): Option[DistancedNode[T]] = {
+    while (true) {
+      if (notVisited.isEmpty) {
+        return Option.empty
+      }
 
-        val node = notVisited.firstKey
-        if (bestSolution.isEmpty || bestSolution.get.cost > node.totalCost) {
-          return Option(node)
-        }
-        notVisited.remove(node)
-        visited.add(node)
+      val node = notVisited.head
+      notVisited -= node
+      if (!visited.contains(node)) {
+        visited += node
+        visited.sortBy(_.totalCost)
+      }
+      if (bestSolution.isEmpty || bestSolution.get.totalCost > node.totalCost) {
+        return Option(node)
       }
     }
     Option.empty
