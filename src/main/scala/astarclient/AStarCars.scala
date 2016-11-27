@@ -10,7 +10,7 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: SpeedPoint, endPoint: Speed
 
   def m = map.length
 
-  def solve = AStarAlgorithm.solve(new AStarParameters[SpeedPoint] {
+  def prepareParameters = new AStarParameters[SpeedPoint] {
     override def start = startPoint
 
     override def isEnd(node: SpeedPoint) = node equals endPoint
@@ -48,5 +48,9 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: SpeedPoint, endPoint: Speed
     }
 
     override def cost(node1: SpeedPoint, node2: SpeedPoint): Double = 1
-  })
+  }
+
+  def solve = AStarAlgorithm.solve(prepareParameters)
+
+  def solveCountingHeuristicCalls = AStarAlgorithm.solveCountingHeuristicCalls(prepareParameters)
 }

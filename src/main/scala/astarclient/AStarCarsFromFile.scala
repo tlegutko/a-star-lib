@@ -5,8 +5,7 @@ import scala.io.Source
 
 case class AStarCarsFromFile(fileName: String) {
 
-  def solve = {
-
+  def prepareAStar = {
     val lines = Source.fromFile(fileName).getLines().toList
 
     val rawMap: List[List[Int]] = lines.tail.map(_.split(" ").map(_.toInt).toList)
@@ -33,6 +32,28 @@ case class AStarCarsFromFile(fileName: String) {
 
     val start = starts.head
     val end = ends.head
-    AStarCars(map, SpeedPoint(start.x, start.y, 0, 0), SpeedPoint(end.x, end.y, 0, 0)).solve
+    AStarCars(map, SpeedPoint(start.x, start.y, 0, 0), SpeedPoint(end.x, end.y, 0, 0))
+  }
+
+  def solve = {
+    val printSolution = true
+    if (printSolution) {
+      val start = System.currentTimeMillis
+      val (solution, heuristicCalls) = prepareAStar.solveCountingHeuristicCalls
+      val end = System.currentTimeMillis
+
+      println("==============================================")
+      println(s"File name: ${fileName.split("/").last}")
+      println(s"Execution time: ${(end - start) / 1000.0} s")
+      println(s"Heuristic function calls: $heuristicCalls")
+      println(s"Number of steps: ${solution.length - 1}")
+      println("Solution:")
+      solution.foreach(println)
+      println("==============================================")
+
+      solution
+    } else {
+      prepareAStar.solve
+    }
   }
 }

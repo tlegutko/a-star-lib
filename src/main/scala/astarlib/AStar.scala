@@ -25,6 +25,25 @@ trait AStarParameters[T] {
 
 object AStarAlgorithm {
 
+  def solveCountingHeuristicCalls[T](parameters: AStarParameters[T]): (List[T], Int) = {
+    var heuristicCalls = 0
+    val solution = solve(new AStarParameters[T] {
+      override def start: T = parameters.start
+
+      override def isEnd(node: T): Boolean = parameters.isEnd(node)
+
+      override def neighbours(node: T): List[T] = parameters.neighbours(node)
+
+      override def heuristic(node: T): Double = {
+        heuristicCalls = heuristicCalls + 1
+        parameters.heuristic(node)
+      }
+
+      override def cost(node1: T, node2: T): Double = parameters.cost(node1, node2)
+    })
+    (solution, heuristicCalls)
+  }
+
   def solve[T](parameters: AStarParameters[T]): List[T] = {
     val startingNode = DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start), List(parameters.start))
 
