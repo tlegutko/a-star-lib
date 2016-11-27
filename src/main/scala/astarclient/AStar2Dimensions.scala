@@ -2,8 +2,6 @@ package astarclient
 
 import astarlib.{AStarAlgorithm, AStarParameters}
 
-case class Point(x: Int, y: Int)
-
 case class AStar2Dimensions(map: Seq[Seq[Int]]) {
 
   def n = map.length
