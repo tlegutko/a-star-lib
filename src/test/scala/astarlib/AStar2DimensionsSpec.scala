@@ -10,7 +10,7 @@ class AStar2DimensionsSpec extends FlatSpec with Matchers {
       Seq(1, 1)
     )
     val correctPath = List(Point(0, 0), Point(1, 1))
-    AStar2Dimensions(map).solve() should be(correctPath)
+    AStar2Dimensions(map).solve should be(correctPath)
   }
   "a-star-lib" should "return correct value for more challenging case" in {
     val map = Seq(
@@ -22,7 +22,7 @@ class AStar2DimensionsSpec extends FlatSpec with Matchers {
     )
     val correctPath = List(Point(0, 0), Point(1, 0), Point(2, 0), Point(3, 0), Point(4, 1), Point(3, 2),
       Point(2, 2), Point(1, 2), Point(0, 3), Point(1, 4), Point(2, 4), Point(3, 4), Point(4, 4))
-    AStar2Dimensions(map).solve() should be(correctPath)
+    AStar2Dimensions(map).solve should be(correctPath)
   }
   "a-star-lib" should "return empty list when there is no solution" in {
     val map = Seq(
@@ -37,6 +37,6 @@ class AStar2DimensionsSpec extends FlatSpec with Matchers {
       Seq(1, 1, 1, 1, 1, 1, 1, 1, 0, 1),
       Seq(1, 1, 1, 1, 1, 1, 1, 1, 0, 1)
     )
-    AStar2Dimensions(map).solve() should be(List.empty)
+    AStar2Dimensions(map).solve should be(List.empty)
   }
 }
