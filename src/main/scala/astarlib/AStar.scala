@@ -101,12 +101,12 @@ object AStarAlgorithm {
 
       val node = notVisited.reduce((node1, node2) => if (node1.totalCost < node2.totalCost) node1 else node2)
 
+      notVisited remove node
+      visited add node
+
       if (bestSolution.isEmpty || bestSolution.get.totalCost > node.totalCost) {
         return Option(node)
       }
-
-      notVisited remove node
-      visited add node
     }
     Option.empty
   }

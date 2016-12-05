@@ -20,12 +20,12 @@ class AStarCarsSpec extends FlatSpec with Matchers {
     AStarCarsFromFile("../testRepo/text_in/test05.in").solve.length - 1 should be(24)
   }
   "a-star-lib" should "return correct value for cars example 06" in {
-    AStarCarsFromFile("../testRepo/text_in/test06.in").solve.length - 1 should be(220)
+    AStarCarsFromFile("../testRepo/text_in/test06.in").solve.length - 1 should be(237)
   }
   "a-star-lib" should "return correct value for cars example 07" in {
     AStarCarsFromFile("../testRepo/text_in/test07.in").solve.length - 1 should be(21)
   }
   "a-star-lib" should "return correct value for cars example 1000x1000" in {
-    AStarCarsFromFile("../testRepo/text_in/test1000x1000.in").solve.length - 1 should be(332)
+    AStarCarsFromFile("../testRepo/text_in/test1000x1000.in").solve.length - 1 should be(337)
   }
 }

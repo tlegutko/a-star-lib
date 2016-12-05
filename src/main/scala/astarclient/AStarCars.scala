@@ -31,21 +31,36 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: SpeedPoint, endPoint: Speed
     }
 
     override def heuristic(node: SpeedPoint): Double = {
-      val distance = (endPoint.x - node.x) + (endPoint.y - node.y)
-      val speed = node.vx + node.vy
-
-      var distanceInSteps = speed
-      var steps = 1
-
-      while (true) {
-        if (distance <= distanceInSteps) {
-          return steps
-        }
-        distanceInSteps = distanceInSteps + steps * 2 + speed
-        steps = steps + 1
-      }
-      0
+      val minStepsX = calculateMinNumberOfSteps(node.x, node.vx, endPoint.x)
+      val minStepsY = calculateMinNumberOfSteps(node.y, node.vy, endPoint.y)
+      math.max(minStepsX, minStepsY)
     }
+
+    private def calculateMinNumberOfSteps(start: Int, speed: Int, end: Int): Int = {
+      val distance = math.abs(start - end)
+      var speedTowardsTarget = speed
+      if (end < start) {
+        speedTowardsTarget = -speedTowardsTarget
+      }
+      calculateMinNumberOfSteps(distance, speedTowardsTarget)
+    }
+
+    private def calculateMinNumberOfSteps(distance: Int, speedTowardsTarget: Int): Int = {
+      if (speedTowardsTarget < 0) {
+        val speedAwayFromTarget = -speedTowardsTarget
+        o2v2oSteps(v2o(speedAwayFromTarget) + distance) + speedAwayFromTarget
+      } else if (v2o(speedTowardsTarget) > distance) {
+        o2v2oSteps(v2o(speedTowardsTarget) - distance) + speedTowardsTarget
+      } else {
+        vo2v2v0Steps(distance - v2o(speedTowardsTarget), speedTowardsTarget) + speedTowardsTarget
+      }
+    }
+
+    private def v2o(v: Int): Int = v * (v - 1) / 2
+
+    private def o2v2oSteps(x: Int): Int = math.ceil(2 * math.sqrt(x)).toInt
+
+    private def vo2v2v0Steps(x: Int, v0: Int): Int = math.ceil(2 * (math.sqrt(x + v0 * v0) - v0 * v0)).toInt
 
     override def cost(node1: SpeedPoint, node2: SpeedPoint): Double = 1
   }
