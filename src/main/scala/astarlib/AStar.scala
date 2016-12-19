@@ -47,8 +47,8 @@ object AStarAlgorithm {
   def solve[T](parameters: AStarParameters[T]): List[T] = {
     val startingNode = DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start), List(parameters.start))
 
-    val visited = mutable.ListBuffer.empty[DistancedNode[T]]
-    val notVisited = mutable.ListBuffer(startingNode)
+    val visited: mutable.HashSet[DistancedNode[T]] = mutable.HashSet.empty
+    val notVisited: mutable.HashSet[DistancedNode[T]] = mutable.HashSet(startingNode)
     var bestSolution = Option.empty[DistancedNode[T]]
 
     while (true) {
@@ -69,13 +69,9 @@ object AStarAlgorithm {
           if (bestSolution.isEmpty || bestSolution.get.cost > aNode.cost) {
             bestSolution = Option(aNode)
           }
-          if (!visited.contains(aNode)) {
-            visited += aNode
-            visited.sortBy(_.totalCost)
-          }
-        } else if (!(visited.contains(aNode) || notVisited.contains(aNode))) {
-          notVisited += aNode
-          notVisited.sortBy(_.totalCost)
+          visited add aNode
+        } else if (!((visited contains aNode) || (notVisited contains aNode))) {
+          notVisited add aNode
         }
       })
     }
@@ -95,20 +91,19 @@ object AStarAlgorithm {
     })
   }
 
-  private def nodeToContinueWith[T](visited: mutable.ListBuffer[DistancedNode[T]],
-                                    notVisited: mutable.ListBuffer[DistancedNode[T]],
+  private def nodeToContinueWith[T](visited: mutable.HashSet[DistancedNode[T]],
+                                    notVisited: mutable.HashSet[DistancedNode[T]],
                                     bestSolution: Option[DistancedNode[T]]): Option[DistancedNode[T]] = {
     while (true) {
       if (notVisited.isEmpty) {
         return Option.empty
       }
 
-      val node = notVisited.head
-      notVisited -= node
-      if (!visited.contains(node)) {
-        visited += node
-        visited.sortBy(_.totalCost)
-      }
+      val node = notVisited.reduce((node1, node2) => if (node1.totalCost < node2.totalCost) node1 else node2)
+
+      notVisited remove node
+      visited add node
+
       if (bestSolution.isEmpty || bestSolution.get.totalCost > node.totalCost) {
         return Option(node)
       }

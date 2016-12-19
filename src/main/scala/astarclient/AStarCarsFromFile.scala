@@ -47,8 +47,8 @@ case class AStarCarsFromFile(fileName: String) {
       println(s"Execution time: ${(end - start) / 1000.0} s")
       println(s"Heuristic function calls: $heuristicCalls")
       println(s"Number of steps: ${solution.length - 1}")
-      println("Solution:")
-      solution.foreach(println)
+      //      println("Solution:")
+      //      solution.foreach(println)
       println("==============================================")
 
       solution
