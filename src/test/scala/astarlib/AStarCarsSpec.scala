@@ -16,16 +16,49 @@ class AStarCarsSpec extends FlatSpec with Matchers {
   "a-star-lib" should "return correct value for cars example 04" in {
     AStarCarsFromFile("src/test/resources/test04.in").solve.length - 1 should be(23)
   }
-  "a-star-lib" should "return correct value for cars example 05" in {
+  "a-star-lib" should "return correct value for cars example 05 0" in {
     AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
   }
-  "a-star-lib" should "return correct value for cars example 06" in {
-    AStarCarsFromFile("src/test/resources/test06.in").solve.length - 1 should be(237)
+  "a-star-lib" should "return correct value for cars example 05 1" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
   }
-  "a-star-lib" should "return correct value for cars example 07" in {
-    AStarCarsFromFile("src/test/resources/test07.in").solve.length - 1 should be(21)
+  "a-star-lib" should "return correct value for cars example 05 2" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
   }
-  "a-star-lib" should "return correct value for cars example 1000x1000" in {
-    AStarCarsFromFile("src/test/resources/test1000x1000.in").solve.length - 1 should be(337)
+  "a-star-lib" should "return correct value for cars example 05 3" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 4" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 5" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 6" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 7" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 8" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 9" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 10" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 11" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 12" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 13" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
+  }
+  "a-star-lib" should "return correct value for cars example 05 14" in {
+    AStarCarsFromFile("src/test/resources/test05.in").solve.length - 1 should be(24)
   }
 }
