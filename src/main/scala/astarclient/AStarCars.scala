@@ -48,19 +48,32 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: SpeedPoint, endPoint: Speed
     private def calculateMinNumberOfSteps(distance: Int, speedTowardsTarget: Int): Int = {
       if (speedTowardsTarget < 0) {
         val speedAwayFromTarget = -speedTowardsTarget
-        o2v2oSteps(v2o(speedAwayFromTarget) + distance) + speedAwayFromTarget
-      } else if (v2o(speedTowardsTarget) > distance) {
-        o2v2oSteps(v2o(speedTowardsTarget) - distance) + speedTowardsTarget
+        minStepsToGoThrough(distanceWhileStoppingFrom(speedAwayFromTarget) + distance) + speedAwayFromTarget
       } else {
-        vo2v2v0Steps(distance - v2o(speedTowardsTarget), speedTowardsTarget) + speedTowardsTarget
+        val distanceWhileStoppingFromStartSpeed = distanceWhileStoppingFrom(speedTowardsTarget)
+        if (distanceWhileStoppingFromStartSpeed > distance) {
+          minStepsToGoThrough(distanceWhileStoppingFromStartSpeed - distance) + speedTowardsTarget
+        } else {
+          minStepsToGoThroughStartingAtVo(distance - distanceWhileStoppingFromStartSpeed, speedTowardsTarget) + speedTowardsTarget
+        }
       }
     }
+
+    private def distanceWhileStoppingFrom(v: Int) = v2o(v)
+
+    private def minStepsToGoThrough(x: Int) = math.min(o2v2oSteps(x), o2vv2oSteps(x))
+
+    private def minStepsToGoThroughStartingAtVo(x: Int, v0: Int) = math.min(vo2v2voSteps(x, v0), vo2vv2voSteps(x, v0))
 
     private def v2o(v: Int): Int = v * (v - 1) / 2
 
     private def o2v2oSteps(x: Int): Int = math.ceil(2 * math.sqrt(x)).toInt
 
-    private def vo2v2v0Steps(x: Int, v0: Int): Int = math.ceil(2 * (math.sqrt(x + v0 * v0) - v0 * v0)).toInt
+    private def o2vv2oSteps(x: Int): Int = math.ceil(math.sqrt(1 + 4 * x)).toInt
+
+    private def vo2v2voSteps(x: Int, v0: Int): Int = math.ceil(2 * (math.sqrt(x + v0 * v0) - v0 * v0)).toInt
+
+    private def vo2vv2voSteps(x: Int, v0: Int): Int = math.ceil(math.sqrt(1 + 4 * (x + v0 * v0)) - 2 * v0 * v0).toInt
 
     override def cost(node1: SpeedPoint, node2: SpeedPoint): Double = 1
   }
