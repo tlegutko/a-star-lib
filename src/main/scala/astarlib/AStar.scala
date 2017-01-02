@@ -1,6 +1,7 @@
 package astarlib
 
 import scala.collection.mutable
+import scala.concurrent.Future
 
 private case class DistancedNode[T](data: T, cost: Double, heuristic: Double, path: List[T]) {
   def totalCost: Double = cost + heuristic
@@ -82,10 +83,18 @@ object AStarAlgorithm {
   private def calculateNeighbours[T](originalNode: DistancedNode[T], parameters: AStarParameters[T]): List[DistancedNode[T]] = {
     val rawNeighbours = parameters.neighbours(originalNode.data)
 
+    val calculatedHeuristics: mutable.HashMap[T, Future[Double]] = mutable.HashMap.empty
+
+    rawNeighbours.foreach(rawNeighbour => {
+      calculatedHeuristics.put(rawNeighbour, Future {
+        parameters.heuristic(rawNeighbour)
+      })
+    })
+
     rawNeighbours.map(rawNeighbour => {
 
       val cost = originalNode.cost + parameters.cost(originalNode.data, rawNeighbour)
-      val heuristic = parameters.heuristic(rawNeighbour)
+      val heuristic = calculatedHeuristics.get(rawNeighbour).result
 
       DistancedNode(rawNeighbour, cost, heuristic, originalNode.path :+ rawNeighbour)
     })

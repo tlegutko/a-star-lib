@@ -22,13 +22,13 @@ case class AStarCarsFromFile(fileName: String) {
       }
     }
 
-    val map = rawMap.map(_.map(number => {
+    val map = rawMap.map(_.map(number =>
       if (number == 1) {
         1
       } else {
         0
       }
-    }))
+    ))
 
     val start = starts.head
     val end = ends.head
