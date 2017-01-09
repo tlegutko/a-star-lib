@@ -4,33 +4,65 @@ import astarlib.{AStarAlgorithm, AStarParameters}
 
 import scala.collection.mutable
 
-case class AStarCars(map: Seq[Seq[Int]], startPoint: SpeedPoint, endPoint: SpeedPoint) {
+case class AStarCars(map: Seq[Seq[Int]], startPoint: CarsState, endPoint: CarState) {
 
   def n = map.head.length
 
   def m = map.length
 
-  def prepareParameters = new AStarParameters[SpeedPoint] {
+  def prepareParameters = new AStarParameters[CarsState] {
     override def start = startPoint
 
-    override def isEnd(node: SpeedPoint) = node equals endPoint
+    override def isEnd(node: CarsState) = node.cars.forall(node => (node equals endPoint) || node.x == -1)
 
-    override def neighbours(node: SpeedPoint): List[SpeedPoint] = {
-      val result: mutable.ListBuffer[SpeedPoint] = mutable.ListBuffer.empty
+    override def neighbours(node: CarsState): List[CarsState] = {
+      cartesianProduct(node.cars.map(neighbourStates)).filter(stateValid).map(CarsState)
+    }
+
+    private def stateValid(state: List[CarState]): Boolean = {
+      for (index1 <- state.indices) {
+        val car1 = state(index1)
+        if (car1.x >= 0) {
+          for (index2 <- index1 + 1 until state.length) {
+            val car2 = state(index2)
+            if (car1.x == car2.x && car1.y == car2.y) {
+              return false
+            }
+          }
+        }
+      }
+      true
+    }
+
+    private def cartesianProduct(xss: List[List[CarState]]): List[List[CarState]] = xss match {
+      case Nil => List(Nil)
+      case h :: t => for (xh <- h; xt <- cartesianProduct(t)) yield xh :: xt
+    }
+
+    private def neighbourStates(node: CarState): List[CarState] = {
+      if ((node equals endPoint) || (node.x == -1)) {
+        return List(CarState(-1, -1, 0, 0))
+      }
+
+      val result: mutable.ListBuffer[CarState] = mutable.ListBuffer.empty
 
       for (i <- -1 to 1; j <- -1 to 1) {
         val newX = node.x + node.vx + i
         val newY = node.y + node.vy + j
 
         if (newX >= 0 && newX < n && newY >= 0 && newY < m && map(newY)(newX) == 0) {
-          result += SpeedPoint(newX, newY, node.vx + i, node.vy + j)
+          result += CarState(newX, newY, node.vx + i, node.vy + j)
         }
       }
 
       result.toList
     }
 
-    override def heuristic(node: SpeedPoint): Double = {
+    override def heuristic(node: CarsState): Double = {
+      node.cars.map(heuristic(_)).reduce(math.max(_, _))
+    }
+
+    def heuristic(node: CarState): Double = {
       val minStepsX = calculateMinNumberOfSteps(node.x, node.vx, endPoint.x)
       val minStepsY = calculateMinNumberOfSteps(node.y, node.vy, endPoint.y)
       math.max(minStepsX, minStepsY)
@@ -75,10 +107,10 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: SpeedPoint, endPoint: Speed
 
     private def vo2vv2voSteps(x: Int, v0: Int): Int = math.ceil(math.sqrt(1 + 4 * (x + v0 * v0)) - 2 * v0 * v0).toInt
 
-    override def cost(node1: SpeedPoint, node2: SpeedPoint): Double = 1
+    override def cost(node1: CarsState, node2: CarsState): Double = 1
   }
 
-  def solve = AStarAlgorithm.solve(prepareParameters)
+  def solve = new AStarAlgorithm(1).solve(prepareParameters)
 
-  def solveCountingHeuristicCalls = AStarAlgorithm.solveCountingHeuristicCalls(prepareParameters)
+  def solveCountingHeuristicCalls = new AStarAlgorithm(1).solveCountingHeuristicCalls(prepareParameters)
 }

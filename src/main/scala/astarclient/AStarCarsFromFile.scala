@@ -3,7 +3,7 @@ package astarclient
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
-case class AStarCarsFromFile(fileName: String) {
+case class AStarCarsFromFile(fileName: String, outputFilename: String) {
 
   def prepareAStar = {
     val lines = Source.fromFile(fileName).getLines().toList
@@ -30,14 +30,24 @@ case class AStarCarsFromFile(fileName: String) {
       }
     ))
 
-    val start = starts.head
     val end = ends.head
-    AStarCars(map, SpeedPoint(start.x, start.y, 0, 0), SpeedPoint(end.x, end.y, 0, 0))
+    AStarCars(map, CarsState(starts.map(start => CarState(start.x, start.y, 0, 0)).toList), CarState(end.x, end.y, 0, 0))
+  }
+
+  def printToFile(filename: String)(op: java.io.PrintWriter => Unit) {
+    val p = new java.io.PrintWriter(new java.io.File(filename))
+    try {
+      op(p)
+    } finally {
+      p.close()
+    }
   }
 
   def solve = {
     val printSolution = true
     if (printSolution) {
+
+      // printing to console
       val start = System.currentTimeMillis
       val (solution, heuristicCalls) = prepareAStar.solveCountingHeuristicCalls
       val end = System.currentTimeMillis
@@ -50,6 +60,12 @@ case class AStarCarsFromFile(fileName: String) {
       //      println("Solution:")
       //      solution.foreach(println)
       println("==============================================")
+
+      // printing to file
+      printToFile(outputFilename) { printer =>
+        printer.println(s"${solution.length} 1")
+        solution.foreach(_.cars.foreach(car => printer.println(s"${car.x} ${car.y} ${car.vx} ${car.vy}")))
+      }
 
       solution
     } else {

@@ -6,7 +6,7 @@ case class AStar2Dimensions(map: Seq[Seq[Int]]) {
 
   def n = map.length
 
-  def solve() = AStarAlgorithm.solve(new AStarParameters[Point] {
+  def solve() = new AStarAlgorithm(1).solve(new AStarParameters[Point] {
     override def start = Point(0, 0)
 
     override def isEnd(node: Point) = node.x == n - 1 && node.y == n - 1

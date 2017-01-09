@@ -1,7 +1,13 @@
 package astarlib
 
+import java.util.concurrent.TimeUnit
+
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.util.Timeout
+
 import scala.collection.mutable
-import scala.concurrent.Future
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 private case class DistancedNode[T](data: T, cost: Double, heuristic: Double, path: List[T]) {
   def totalCost: Double = cost + heuristic
@@ -24,7 +30,8 @@ trait AStarParameters[T] {
   def cost(node1: T, node2: T): Double
 }
 
-object AStarAlgorithm {
+class AStarAlgorithm(numberOfParallelHeuristicProcessors: Int) {
+  val actorSystem: ActorSystem = ActorSystem("astarsystem")
 
   def solveCountingHeuristicCalls[T](parameters: AStarParameters[T]): (List[T], Int) = {
     var heuristicCalls = 0
@@ -46,6 +53,7 @@ object AStarAlgorithm {
   }
 
   def solve[T](parameters: AStarParameters[T]): List[T] = {
+    val heuristicScheduler: ActorRef = actorSystem.actorOf(Props(new HeuristicScheduler[T](actorSystem, parameters.heuristic, numberOfParallelHeuristicProcessors)))
     val startingNode = DistancedNode(parameters.start, 0, parameters.heuristic(parameters.start), List(parameters.start))
 
     val visited: mutable.HashSet[DistancedNode[T]] = mutable.HashSet.empty
@@ -65,7 +73,7 @@ object AStarAlgorithm {
 
       val node = maybeNode.get
 
-      calculateNeighbours(node, parameters).foreach(aNode => {
+      calculateNeighbours(node, parameters, heuristicScheduler).foreach(aNode => {
         if (parameters.isEnd(aNode.data)) {
           if (bestSolution.isEmpty || bestSolution.get.cost > aNode.cost) {
             bestSolution = Option(aNode)
@@ -80,21 +88,17 @@ object AStarAlgorithm {
     List.empty
   }
 
-  private def calculateNeighbours[T](originalNode: DistancedNode[T], parameters: AStarParameters[T]): List[DistancedNode[T]] = {
+  private def calculateNeighbours[T](originalNode: DistancedNode[T], parameters: AStarParameters[T], heuristicScheduler: ActorRef): List[DistancedNode[T]] = {
     val rawNeighbours = parameters.neighbours(originalNode.data)
-
-    val calculatedHeuristics: mutable.HashMap[T, Future[Double]] = mutable.HashMap.empty
-
-    rawNeighbours.foreach(rawNeighbour => {
-      calculatedHeuristics.put(rawNeighbour, Future {
-        parameters.heuristic(rawNeighbour)
-      })
-    })
+    val calculatedHeuristics: mutable.HashMap[T, Double] =
+      Await.result(akka.pattern.ask(heuristicScheduler, CalculationRequest(rawNeighbours))(Timeout(10, TimeUnit.DAYS))
+        .mapTo[CalculationResponse[T]]
+        , Duration.Inf)
+        .resultsMap
 
     rawNeighbours.map(rawNeighbour => {
-
       val cost = originalNode.cost + parameters.cost(originalNode.data, rawNeighbour)
-      val heuristic = calculatedHeuristics.get(rawNeighbour).result
+      val heuristic = calculatedHeuristics(rawNeighbour)
 
       DistancedNode(rawNeighbour, cost, heuristic, originalNode.path :+ rawNeighbour)
     })
@@ -118,5 +122,47 @@ object AStarAlgorithm {
       }
     }
     Option.empty
+  }
+}
+
+private case class CalculationRequest[T](request: List[T])
+
+private case class CalculationResponse[T](resultsMap: mutable.HashMap[T, Double])
+
+private case class CalculationTask[T](arg: T)
+
+private case class CalculationTaskResponse[T](arg: T, response: Double)
+
+private class HeuristicScheduler[T](actorSystem: ActorSystem, heuristicFunction: T => Double, numberOfProcessors: Int) extends Actor {
+  val processors: List[ActorRef] = (for (i <- 1 to numberOfProcessors) yield actorSystem.actorOf(Props(new HeuristicProcessor[T](heuristicFunction)))).toList
+
+  var currentRequest: mutable.HashMap[T, Double] = _
+  var currentRequestSender: ActorRef = _
+  var currentRequestResponses: Int = 0
+
+  override def receive = {
+    case CalculationRequest(request: List[T]) =>
+      currentRequest = mutable.HashMap.empty
+      currentRequestSender = sender
+      currentRequestResponses = 0
+      var i: Int = 0
+      for (key <- request) {
+        processors(i) ! CalculationTask(key)
+        i = (i + 1) % numberOfProcessors
+      }
+    case CalculationTaskResponse(arg: T, result: Double) =>
+      currentRequest.put(arg, result)
+      currentRequestResponses = currentRequestResponses + 1
+      if (currentRequestResponses == currentRequest.size) {
+        currentRequestSender ! CalculationResponse(currentRequest)
+      }
+    case _ => println("unknown")
+  }
+}
+
+private class HeuristicProcessor[T](heuristicFunction: T => Double) extends Actor {
+  override def receive = {
+    case CalculationTask(arg: T) =>
+      sender ! CalculationTaskResponse(arg, heuristicFunction(arg))
   }
 }
