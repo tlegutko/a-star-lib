@@ -138,13 +138,13 @@ private class HeuristicScheduler[T](actorSystem: ActorSystem, heuristicFunction:
 
   var currentRequest: mutable.HashMap[T, Double] = _
   var currentRequestSender: ActorRef = _
-  var currentRequestResponses: Int = 0
+  var currentRequestSize: Int = 0
 
   override def receive = {
     case CalculationRequest(request: List[T]) =>
       currentRequest = mutable.HashMap.empty
       currentRequestSender = sender
-      currentRequestResponses = 0
+      currentRequestSize = request.length
       var i: Int = 0
       for (key <- request) {
         processors(i) ! CalculationTask(key)
@@ -152,8 +152,7 @@ private class HeuristicScheduler[T](actorSystem: ActorSystem, heuristicFunction:
       }
     case CalculationTaskResponse(arg: T, result: Double) =>
       currentRequest.put(arg, result)
-      currentRequestResponses = currentRequestResponses + 1
-      if (currentRequestResponses == currentRequest.size) {
+      if (currentRequestSize == currentRequest.size) {
         currentRequestSender ! CalculationResponse(currentRequest)
       }
     case _ => println("unknown")
