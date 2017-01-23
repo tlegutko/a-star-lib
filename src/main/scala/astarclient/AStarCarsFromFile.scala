@@ -43,13 +43,13 @@ case class AStarCarsFromFile(fileName: String, outputFilename: String) {
     }
   }
 
-  def solve = {
+  def solve(numberOfParallelHeuristicProcessors: Int) = {
     val printSolution = true
     if (printSolution) {
 
       // printing to console
       val start = System.currentTimeMillis
-      val (solution, heuristicCalls) = prepareAStar.solveCountingHeuristicCalls
+      val (solution, heuristicCalls) = prepareAStar.solveCountingHeuristicCalls(numberOfParallelHeuristicProcessors)
       val end = System.currentTimeMillis
 
       println("==============================================")
@@ -69,7 +69,7 @@ case class AStarCarsFromFile(fileName: String, outputFilename: String) {
 
       solution
     } else {
-      prepareAStar.solve
+      prepareAStar.solve(numberOfParallelHeuristicProcessors)
     }
   }
 }

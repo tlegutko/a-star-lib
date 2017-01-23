@@ -6,9 +6,9 @@ import scala.collection.mutable
 
 case class AStarCars(map: Seq[Seq[Int]], startPoint: CarsState, endPoint: CarState) {
 
-  def n = map.head.length
+  private val n = map.head.length
 
-  def m = map.length
+  private val m = map.length
 
   def prepareParameters = new AStarParameters[CarsState] {
     override def start = startPoint
@@ -110,7 +110,7 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: CarsState, endPoint: CarSta
     override def cost(node1: CarsState, node2: CarsState): Double = 1
   }
 
-  def solve = new AStarAlgorithm(1).solve(prepareParameters)
+  def solve(numberOfParallelHeuristicProcessors: Int) = new AStarAlgorithm(numberOfParallelHeuristicProcessors).solve(prepareParameters)
 
-  def solveCountingHeuristicCalls = new AStarAlgorithm(1).solveCountingHeuristicCalls(prepareParameters)
+  def solveCountingHeuristicCalls(numberOfParallelHeuristicProcessors: Int) = new AStarAlgorithm(numberOfParallelHeuristicProcessors).solveCountingHeuristicCalls(prepareParameters)
 }

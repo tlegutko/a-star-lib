@@ -7,14 +7,14 @@ class AStarCarsSpec extends FlatSpec with Matchers {
 
   def test(testNum: String): Int = {
     val pathPrefix = "src/main/resources"
-    AStarCarsFromFile(s"$pathPrefix/text_in/test$testNum.in", s"$pathPrefix/text_out/test$testNum.out").solve.length - 1
+    AStarCarsFromFile(s"$pathPrefix/text_in/test$testNum.in", s"$pathPrefix/text_out/test$testNum.out").solve(8).length - 1
   }
 
   "a-star-lib" should "return correct value for cars example 01" in {
-   test("01") should be(2)
+    test("01") should be(2)
   }
   "a-star-lib" should "return correct value for cars example 02" in {
-   test("02") should be(3)
+    test("02") should be(3)
   }
   "a-star-lib" should "return correct value for cars example 03" in {
     test("03") should be(8)
