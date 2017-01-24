@@ -72,4 +72,34 @@ case class AStarCarsFromFile(fileName: String, outputFilename: String) {
       prepareAStar.solve(numberOfParallelHeuristicProcessors)
     }
   }
+
+  def solveWithAStarH(numberOfParallelHeuristicProcessors: Int) = {
+    val printSolution = true
+    if (printSolution) {
+
+      // printing to console
+      val start = System.currentTimeMillis
+      val (solution, heuristicCalls) = prepareAStar.solveWithAStarHCountingHeuristicCalls(numberOfParallelHeuristicProcessors)
+      val end = System.currentTimeMillis
+
+      println("==============================================")
+      println(s"File name: ${fileName.split("/").last}")
+      println(s"Execution time: ${(end - start) / 1000.0} s")
+      println(s"Heuristic function calls: $heuristicCalls")
+      println(s"Number of steps: ${solution.length - 1}")
+      //      println("Solution:")
+      //      solution.foreach(println)
+      println("==============================================")
+
+      // printing to file
+      printToFile(outputFilename) { printer =>
+        printer.println(s"${solution.length} 1")
+        solution.foreach(_.cars.foreach(car => printer.println(s"${car.x} ${car.y} ${car.vx} ${car.vy}")))
+      }
+
+      solution
+    } else {
+      prepareAStar.solveWithAStarH(numberOfParallelHeuristicProcessors)
+    }
+  }
 }

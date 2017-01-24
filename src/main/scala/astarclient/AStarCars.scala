@@ -10,7 +10,7 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: CarsState, endPoint: CarSta
 
   private val m = map.length
 
-  def prepareParameters = new AStarParameters[CarsState] {
+  def prepareParameters(useAStarH: Boolean) = new AStarParameters[CarsState] {
     override def start = startPoint
 
     override def isEnd(node: CarsState) = node.cars.forall(node => (node equals endPoint) || node.x == -1)
@@ -59,10 +59,44 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: CarsState, endPoint: CarSta
     }
 
     override def heuristic(node: CarsState): Double = {
-      node.cars.map(heuristic(_)).reduce(math.max(_, _))
+      val innerHeuristic: CarState => Double =
+        if (useAStarH) {
+          carState => new AStarAlgorithm(1).solve(new AStarParameters[CarState] {
+            override def start = carState
+
+            override def isEnd(node: CarState) = (node equals endPoint) || node.x == -1
+
+            override def neighbours(node: CarState): List[CarState] = {
+              if ((node equals endPoint) || (node.x == -1)) {
+                return List(CarState(-1, -1, 0, 0))
+              }
+
+              val result: mutable.ListBuffer[CarState] = mutable.ListBuffer.empty
+
+              for (i <- -1 to 1; j <- -1 to 1) {
+                val newX = node.x + node.vx + i
+                val newY = node.y + node.vy + j
+
+                if (newX >= 0 && newX < n && newY >= 0 && newY < m && map(newY)(newX) == 0) {
+                  result += CarState(newX, newY, node.vx + i, node.vy + j)
+                }
+              }
+
+              result.toList
+            }
+
+            override def heuristic(node: CarState): Double = heuristicForOneCar(node)
+
+            override def cost(node1: CarState, node2: CarState): Double = 1
+          }).length - 1
+        } else {
+          heuristicForOneCar
+        }
+
+      node.cars.map(innerHeuristic).reduce(math.max(_, _))
     }
 
-    def heuristic(node: CarState): Double = {
+    def heuristicForOneCar(node: CarState): Double = {
       val minStepsX = calculateMinNumberOfSteps(node.x, node.vx, endPoint.x)
       val minStepsY = calculateMinNumberOfSteps(node.y, node.vy, endPoint.y)
       math.max(minStepsX, minStepsY)
@@ -110,7 +144,15 @@ case class AStarCars(map: Seq[Seq[Int]], startPoint: CarsState, endPoint: CarSta
     override def cost(node1: CarsState, node2: CarsState): Double = 1
   }
 
-  def solve(numberOfParallelHeuristicProcessors: Int) = new AStarAlgorithm(numberOfParallelHeuristicProcessors).solve(prepareParameters)
+  def solve(numberOfParallelHeuristicProcessors: Int) =
+    new AStarAlgorithm(numberOfParallelHeuristicProcessors).solve(prepareParameters(false))
 
-  def solveCountingHeuristicCalls(numberOfParallelHeuristicProcessors: Int) = new AStarAlgorithm(numberOfParallelHeuristicProcessors).solveCountingHeuristicCalls(prepareParameters)
+  def solveCountingHeuristicCalls(numberOfParallelHeuristicProcessors: Int) =
+    new AStarAlgorithm(numberOfParallelHeuristicProcessors).solveCountingHeuristicCalls(prepareParameters(false))
+
+  def solveWithAStarH(numberOfParallelHeuristicProcessors: Int) =
+    new AStarAlgorithm(numberOfParallelHeuristicProcessors).solve(prepareParameters(true))
+
+  def solveWithAStarHCountingHeuristicCalls(numberOfParallelHeuristicProcessors: Int) =
+    new AStarAlgorithm(numberOfParallelHeuristicProcessors).solveCountingHeuristicCalls(prepareParameters(true))
 }
