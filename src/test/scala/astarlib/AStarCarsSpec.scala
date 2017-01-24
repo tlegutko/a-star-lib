@@ -36,6 +36,15 @@ class AStarCarsSpec extends FlatSpec with Matchers {
   "a-star-lib" should "return correct value for cars example 08" in {
     test("08") should be(5)
   }
+  "a-star-lib" should "return correct value for cars example 11" in {
+    test("11") should be(7)
+  }
+  "a-star-lib" should "return correct value for cars example 12" in {
+    test("12") should be(9)
+  }
+  "a-star-lib" should "return correct value for cars example 13" in {
+    test("13") should be(8)
+  }
 
 
   //  "a-star-lib" should "return correct value for cars example 09" in {
