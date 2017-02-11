@@ -2,6 +2,10 @@
 
 Library for running parallel A* algorithm in user-defined problem space implemented in Scala using Akka Framework.
 
+## Documentation
+
+[link](https://github.com/tlegutko/a-star-lib/wiki)
+
 ## Computational Intelligence Project
 
 Authors: Tomasz Legutko, Szymon Łabuz
